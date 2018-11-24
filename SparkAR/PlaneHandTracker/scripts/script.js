@@ -44,6 +44,47 @@ handSimulator.transform.position = camera.worldTransform.applyTo(HandTracking.ha
 
 // The condition for when a hit will trigger
 var hitCondition = handSimulator.transform.position.z.lt(groundTracker.transform.position.z.add(hitMargin) /* should always be 0 */)
-hitCondition.monitor().subscribeWithSnapshot({handZ: handSimulator.transform.position.z}, function (e, snapshot) {
+hitCondition.monitor().subscribe(function (e) {
 	setHitState(e.newValue);
 })
+
+
+/**
+ * Get the distance between two transforms.
+ */
+function transformDistance(transformA, transformB) {
+	return Math.sqrt(
+		Math.pow(transformA.x - transformB.x) +
+		Math.pow(transformA.y - transformB.y) +
+		Math.pow(transformA.z - transformB.z)
+	);
+}
+
+/**
+ * Check if two transforms are colliding.
+ *
+ * @param transformA the first transform.
+ * @param tARange the radius of the collision sphere around transform A.
+ * @param transformB the second transform.
+ * @param tBRange the radius of the collision sphere around transform B.
+ */
+function doTransformsCollide(transformA, tARadius, transformB, tBRadius) {
+	return (transformDistance(transformA, transformB) - tARadius - tBRadius) < 0;
+}
+
+/**
+ * Check the collisions with a list of minions.
+ *
+ * @param minionList The list of minions to check. Each object should at least 
+ * 					 contain a transform and hitRadius.
+ * @param hitTransform The transform to check the collisions with.
+ * @param hitRadius The radius of the object to check the collision with.
+ */
+function checkMinionCollisions(minionList, hitTransform, hitRadius) {
+	for (var minion of minionList) {
+		if (doTransformsCollide(minion.transform, minion.hitRadius, hitTransform, hitRadius)) {
+			// TODO: Kill this minion
+		}
+	}
+}
+
