@@ -5,7 +5,7 @@ const HandTracking = require('HandTracking');
 const Time = require('Time');
 
 // The depth the hand should be from the camera to detect a hit.
-const HIT_MARGIN = 0.1
+const HIT_MARGIN = 0.125
 // The size of the enemy object pool.
 const OBJ_COUNT = 10
 const UNIT_SCALE = .05
@@ -44,7 +44,7 @@ function onStart() {
  */
 function setHitState(newHitValue) {
 	hitIndicator.hidden = !newHitValue
-	if (hitState !== newHitValue && HandTracking.count.lastValue > 0) {
+	if (hitState !== newHitValue) {
 		hitState = newHitValue;
 		if (hitState === true) {
 			onHit();
@@ -135,6 +135,7 @@ const updateObjects = fetchedObjects => {
         for (let i = 0; i < OBJ_COUNT; i++) {
             if (i < fetchedObjects.length) {
                 objs[i].hidden = false
+
                 objs[i].transform.x = fetchedObjects[i].x
                 objs[i].transform.y = fetchedObjects[i].y
             }
