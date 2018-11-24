@@ -5,10 +5,10 @@ const HandTracking = require('HandTracking');
 const Time = require('Time');
 
 // The depth the hand should be from the camera to detect a hit.
-const HIT_MARGIN = 0.2
+const HIT_MARGIN = 0.1
 // The size of the enemy object pool.
 const OBJ_COUNT = 10
-const UNIT_SPEED = 0.4
+const UNIT_SCALE = .05
 
 var groundTracker = Scene.root.find('planeTracker');
 var camera = Scene.root.find('Camera');
@@ -22,14 +22,14 @@ const objs = []
 let fetchedObjs = []
 // {"id":"157","x":-2.421,"y":-2.179,"z":0,"speed":0.6}
 
-const MINION_RADIUS = 0.3;
-const HAND_RADIUS = 100;
+const MINION_RADIUS = 1.5 * UNIT_SCALE;
+const HAND_RADIUS = 2 * UNIT_SCALE;
 
 function onStart() {
 	// Populate array with the pool of objects
 	for (let i = 0; i < OBJ_COUNT; i++) {
 	    objs.push(
-	        mainPlane.find(`enemy${i}`)
+	        Scene.root.find(`enemy${i}`)
 	    )
 	}
 	fetchObjects()
@@ -44,7 +44,7 @@ function onStart() {
  */
 function setHitState(newHitValue) {
 	hitIndicator.hidden = !newHitValue
-	if (hitState !== newHitValue) {
+	if (hitState !== newHitValue && HandTracking.count.lastValue > 0) {
 		hitState = newHitValue;
 		if (hitState === true) {
 			onHit();
@@ -73,11 +73,12 @@ hitCondition.monitor().subscribe(function (e) {
 	setHitState(e.newValue);
 })
 
-
 /**
  * Get the distance between two transforms.
  */
 function transformDistance(transformA, transformB) {
+    // Diagnostics.log('minion - ' + JSON.stringify(transformA))
+    // Diagnostics.log('hand - ' + JSON.stringify(transformB))
 	return Math.sqrt(
 		Math.pow(transformA.x - transformB.x, 2) +
 		Math.pow(transformA.y - transformB.y, 2) +
@@ -134,8 +135,8 @@ const updateObjects = fetchedObjects => {
         for (let i = 0; i < OBJ_COUNT; i++) {
             if (i < fetchedObjects.length) {
                 objs[i].hidden = false
-                objs[i].x = fetchedObjects[i].x * UNIT_SPEED
-                objs[i].y = fetchedObjects[i].y * UNIT_SPEED
+                objs[i].transform.x = fetchedObjects[i].x
+                objs[i].transform.y = fetchedObjects[i].y
             }
             else
                 objs[i].hidden = true
@@ -160,7 +161,12 @@ const fetchObjects = (fetchCount, lastTs) => {
             //     fetchCount,
             //     json
             // })
-            fetchedObjs = json.objects
+            fetchedObjs = json.objects.map(unit => {
+                unit.x = unit.x * UNIT_SCALE;
+                unit.y = unit.y * UNIT_SCALE;
+                unit.z = unit.z * UNIT_SCALE;
+                return unit
+            })
             updateObjects(fetchedObjs)
             lastTs = json.ts
             fetchObjects(fetchCount, lastTs)
