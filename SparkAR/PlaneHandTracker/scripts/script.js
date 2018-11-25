@@ -6,9 +6,9 @@ const TouchGestures = require('TouchGestures');
 const Time = require('Time');
 
 // The depth the hand should be from the camera to detect a hit.
-const HIT_MARGIN = 0.5
+const HIT_MARGIN = 0.6
 // The size of the enemy object pool.
-const OBJ_COUNT = 24
+const OBJ_COUNT = 48
 const UNIT_SCALE = .1
 
 var groundTracker = Scene.root.find('planeTracker');
@@ -64,6 +64,13 @@ function setHitState(newHitValue) {
  * This function should only be called by the `setHitState` function.
  */
 function onHit() {
+    Time.setTimeout(() => {
+        if (hitState === true) { 
+            handText.text = 'Lift your hand!'
+        } else {
+            handText.text = ''
+        }
+    }, 500)
 	Diagnostics.log('HIT');
 	checkMinionCollisions(fetchedObjs, handSimulator.transform, HAND_RADIUS);
 	// TODO: Implement actual hit logic.
@@ -77,6 +84,10 @@ handSimulator.transform.position = camera.worldTransform.applyTo(HandTracking.ha
 var hitCondition = handSimulator.transform.position.z.lt(groundTracker.transform.position.z.add(HIT_MARGIN))
 hitCondition.monitor().subscribe(function (e) {
 	setHitState(e.newValue);
+})
+
+HandTracking.count.monitor().subscribe(function (e) {
+    setHitState(false)
 })
 
 /**
@@ -125,13 +136,6 @@ const updateText = () => {
     Time.setTimeout(() => {
         textNode.text = 'Splat em!'
     }, 1500)
-    Time.setTimeout(() => {
-        if (hitState === true) { 
-            handText.text = 'Lift your hand!'
-        } else {
-            handText.text = ''
-        }
-    }, 500)
 }
 
 
