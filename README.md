@@ -5,4 +5,6 @@ The backend server can be found [here](https://github.com/kirillgroshkov/spark-b
 
 ## Try it out
 www.facebook.com/fbcameraeffects/tryit/357678638316112/
-.
+
+## Watch it on Youtube
+https://youtu.be/9DlCAWAnY0g
