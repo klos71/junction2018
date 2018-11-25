@@ -6,7 +6,7 @@ const TouchGestures = require('TouchGestures');
 const Time = require('Time');
 
 // The depth the hand should be from the camera to detect a hit.
-const HIT_MARGIN = 0.250 * 4
+const HIT_MARGIN = 0.5
 // The size of the enemy object pool.
 const OBJ_COUNT = 24
 const UNIT_SCALE = .1
@@ -21,6 +21,7 @@ const deathSound = Scene.root.find('DeathSound');
 const textNode = Scene.root.find('text0');
 const handText = Scene.root.find('handText');
 const killCount = Scene.root.find('killcount');
+const handDebug = Scene.root.find('handDebug');
 const objs = []
 let fetchedObjs = []
 // {"id":"157","x":-2.421,"y":-2.179,"z":0,"speed":0.6}
@@ -73,13 +74,9 @@ function onHit() {
 handSimulator.transform.position = camera.worldTransform.applyTo(HandTracking.hand(0).cameraTransform.position)
 
 // The condition for when a hit will trigger
-var hitCondition = handSimulator.transform.position.z.lt(groundTracker.transform.position.z.add(HIT_MARGIN) /* should always be 0 */)
+var hitCondition = handSimulator.transform.position.z.lt(groundTracker.transform.position.z.add(HIT_MARGIN))
 hitCondition.monitor().subscribe(function (e) {
 	setHitState(e.newValue);
-})
-
-HandTracking.count.monitor().subscribe(function (e) {
-    if (e.newValue === 0) setHitState(false);
 })
 
 /**
@@ -147,6 +144,7 @@ const getTimeDifference = (ts, lastTs) =>
 // update their positions
 // and hide those that do not correspond to a fetched obj
 const updateObjects = fetchedObjects => {
+    handDebug.text = handSimulator.transform.z.lastValue + ''
     if (fetchedObjects.length)
         for (let i = 0; i < OBJ_COUNT; i++) {
             if (i < fetchedObjects.length) {
