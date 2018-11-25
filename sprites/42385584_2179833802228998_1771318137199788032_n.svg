@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="a" x1="145.33" y1="262" x2="878.67" y2="262" gradientUnits="userSpaceOnUse">
+      <stop offset="0.01" stop-color="#1be0ba"/>
+      <stop offset="1" stop-color="#1be0ba"/>
+    </linearGradient>
+  </defs>
+  <title>Artboard 1</title>
+  <g>
+    <polygon points="512 678.67 512 345.33 878.67 512 512 678.67" fill="#0098ff"/>
+    <polygon points="512 345.33 512 678.67 145.33 512 512 345.33" fill="#0098ff"/>
+    <polygon points="512 345.33 145.33 512 512 678.67 512 345.33" opacity="0.2"/>
+    <polygon points="512 678.67 145.33 845.33 512 1012 878.67 845.33 878.67 512 512 678.67" fill="#ff5b82"/>
+    <polygon points="512 12 145.33 178.67 145.33 512 512 345.33 878.67 178.67 512 12" fill="url(#a)"/>
+  </g>
+</svg>

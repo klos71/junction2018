@@ -2,13 +2,14 @@ const Scene = require('Scene');
 const Diagnostics = require('Diagnostics');
 const Networking = require('Networking')
 const HandTracking = require('HandTracking');
+const TouchGestures = require('TouchGestures');
 const Time = require('Time');
 
 // The depth the hand should be from the camera to detect a hit.
-const HIT_MARGIN = 0.125
+const HIT_MARGIN = 0.250 * 4
 // The size of the enemy object pool.
-const OBJ_COUNT = 10
-const UNIT_SCALE = .05
+const OBJ_COUNT = 24
+const UNIT_SCALE = .1
 
 var groundTracker = Scene.root.find('planeTracker');
 var camera = Scene.root.find('Camera');
@@ -18,12 +19,14 @@ var hitState = false
 const mainPlane = Scene.root.find('Town')
 const deathSound = Scene.root.find('DeathSound');
 const textNode = Scene.root.find('text0');
+const handText = Scene.root.find('handText');
+const killCount = Scene.root.find('killcount');
 const objs = []
 let fetchedObjs = []
 // {"id":"157","x":-2.421,"y":-2.179,"z":0,"speed":0.6}
 
 const MINION_RADIUS = 1.5 * UNIT_SCALE;
-const HAND_RADIUS = 2 * UNIT_SCALE;
+const HAND_RADIUS = 3 * UNIT_SCALE;
 
 function onStart() {
 	// Populate array with the pool of objects
@@ -43,12 +46,14 @@ function onStart() {
  * Function should only be called by the hitCondition monitor.
  */
 function setHitState(newHitValue) {
-	hitIndicator.hidden = !newHitValue
+	// hitIndicator.hidden = !newHitValue
 	if (hitState !== newHitValue) {
 		hitState = newHitValue;
 		if (hitState === true) {
 			onHit();
-		}
+		} else {
+            handText.text = ''
+        }
 	}
 }
 
@@ -71,6 +76,10 @@ handSimulator.transform.position = camera.worldTransform.applyTo(HandTracking.ha
 var hitCondition = handSimulator.transform.position.z.lt(groundTracker.transform.position.z.add(HIT_MARGIN) /* should always be 0 */)
 hitCondition.monitor().subscribe(function (e) {
 	setHitState(e.newValue);
+})
+
+HandTracking.count.monitor().subscribe(function (e) {
+    if (e.newValue === 0) setHitState(false);
 })
 
 /**
@@ -119,6 +128,13 @@ const updateText = () => {
     Time.setTimeout(() => {
         textNode.text = 'Splat em!'
     }, 1500)
+    Time.setTimeout(() => {
+        if (hitState === true) { 
+            handText.text = 'Lift your hand!'
+        } else {
+            handText.text = ''
+        }
+    }, 500)
 }
 
 
@@ -138,6 +154,7 @@ const updateObjects = fetchedObjects => {
 
                 objs[i].transform.x = fetchedObjects[i].x
                 objs[i].transform.y = fetchedObjects[i].y
+                objs[i].transform.rotationZ = Math.atan2(fetchedObjects[i].y, fetchedObjects[i].x) + Math.PI
             }
             else
                 objs[i].hidden = true
@@ -169,8 +186,9 @@ const fetchObjects = (fetchCount, lastTs) => {
                 return unit
             })
             updateObjects(fetchedObjs)
-            lastTs = json.ts
-            fetchObjects(fetchCount, lastTs)
+            killCount.text = json.killed + '';
+            lastTs = json.ts;
+            fetchObjects(fetchCount, lastTs);
         })
         .catch(error => {
             Diagnostics.log(error)
@@ -197,6 +215,11 @@ const killObject = objectId => {
             Diagnostics.log(error)
         })
 }
+
+TouchGestures.onTap().subscribe(function(gesture) {
+    onHit()
+});
+
 
 
 onStart()
